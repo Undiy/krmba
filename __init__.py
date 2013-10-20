@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+import datetime
 from xml.dom.minidom import *
 from decimal import Decimal, ROUND_DOWN
 
@@ -11,6 +12,23 @@ CATEGORY_PRICE = dict()
 node_text = lambda node: node.childNodes[0].nodeValue
 def attend():
 	_ = raw_input("\n\nPress any key to finish it.")
+
+def ask_month():
+	month = raw_input("\nChoose month from 1 to 12 (empty for all): ")
+	if month == "":
+		return None
+	try:
+		month = int(month)
+	except ValueError, e:
+		print("\nChoose month from 1 to 12 (empty for all)")
+		return ask_month()
+	else:
+		period = datetime.datetime.today()
+		period.day = 1
+		period.month = month
+		print("Current month is %d.%d" % (period.year, period.month))
+		return period
+	return None
 
 def main_func():
 	with open(
@@ -24,6 +42,7 @@ def main_func():
 	xml = parse(TDL_FILE)
 	result_price = Decimal(0)
 
+	period = ask_month()
 	for task in xml.getElementsByTagName("TASK"):
 		cost = task.getAttributeNode("COST")
 		category_list = task.getElementsByTagName("CATEGORY")
