@@ -23,9 +23,8 @@ def ask_month():
 		print("\nChoose month from 1 to 12 (empty for all)")
 		return ask_month()
 	else:
-		period = datetime.datetime.today()
-		period.day = 1
-		period.month = month
+		today = datetime.datetime.today()
+		period = datetime.datetime(today.year, month, 1)
 		print("Current month is %d.%d" % (period.year, period.month))
 		return period
 	return None
@@ -46,6 +45,12 @@ def main_func():
 	for task in xml.getElementsByTagName("TASK"):
 		cost = task.getAttributeNode("COST")
 		category_list = task.getElementsByTagName("CATEGORY")
+		duedate = task.getAttributeNode("DUEDATESTRING")
+		if duedate and period:
+			duedatestring = duedate.value[:10]
+			task_date = datetime.datetime.strptime(duedatestring, "%d.%m.%Y")
+			if not (task_date.year == period.year and task_date.month == period.month):
+				continue
 		if not len(category_list) or cost is None:
 			continue
 		category = node_text(category_list[0])
@@ -53,7 +58,7 @@ def main_func():
 			price = CATEGORY_PRICE[category]
 		except KeyError:
 			print(
-			"There is no such category: %s in the config file" % category)
+				"There is no such category: %s in the config file" % category)
 			attend()
 
 		result_price += Decimal(cost.value) * Decimal(price)
